@@ -15,7 +15,6 @@ const prompt = Cli.createInterface({
 	output: process.stdout
 });
 
-var cyan = "\033[36m"
 var white = "\033[37m"
 var red = "\033[31m"
 var blue = "\033[34m"
@@ -34,17 +33,18 @@ function clear(){
 function menu(){
 	clear();
 	console.log(banner);
-	console.log(` ${blue}~${red}! ${white}made by Aditia © 2020
+	console.log(` ${blue}~${red}! ${white}made by aditia_dtz © 2020
 
- ${blue}[${white}01${blue}]${white} Search anime
-${blue} [${white}02${blue}]${white} Show information
+${blue} [${white}01${blue}]${white} Home
+${blue} [${white}02${blue}]${white} Search anime
+${blue} [${white}03${blue}]${white} Show information
 ${blue} [${white}00${blue}]${white} Exit!`);
 	prompt.question('\n >>> ', (choice) => {
 		if(choice == ''){
 			console.log(' Nothing Choice ')
 			process.exit();
-		} else if(choice == 1){
-			clear(); console.log(banner); console.log(` ${blue}~${red}!${white} Amime Search `);
+		} else if(choice == 2){
+			clear(); console.log(banner); console.log(` ${blue}~${red}!${white} Anime Search `);
 			prompt.question("\n >>> ",(ttl) => {
 				if(ttl == ''){
 					Err(" Please Input Anime Title!");
@@ -54,16 +54,19 @@ ${blue} [${white}00${blue}]${white} Exit!`);
 							findTitle(result);
 						});
 				}
-//			prompt.close();
 			});
-		} else if(choice == 2){
+		} else if(choice == 3){
 			console.log(`${white} Contact ${blue}=>${white} https://t.me/aditia_dtz`);process.exit(1);
 		} else if(choice == 00){
 			process.exit();
+		} else if(choice == 1){
+			HttpPage(
+				'https://www.kusonime.com/',(result) => {
+					findTitle(result);
+				});
 		} else {
 			Err(" Invalid Choice!");
 		}
-//	prompt.close();
 	});
 }
 
@@ -71,8 +74,7 @@ function HttpPage(target, callback){
 	const post = {
 		url : `${target}`,
 		headers: { "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"}
-		}; try {
-				http.get(post, function(err, response, html){
+		}; try {http.get(post, function(err, response, html){
 					if(!err && response.statusCode == 200){
 						callback(html);
 					} else {
@@ -98,8 +100,14 @@ function findTitle(page){
 			} else if(i.text().includes("Previous Page")){
 				prev.push(i.attr("href"));
 			}
-		}
-	}); console.log("\t   %s\n", $("title").text());
+		} /** cari next & prev home **/
+	});if(next.length == 0 || prev.length == 0){
+		$('a[class="previouspostslink"]').each((i,e) => {
+			prev.push($(e).attr('href'));
+		}); $('a[class="nextpostslink"]').each((i,e) => {
+			next.push($(e).attr('href'));
+		});
+	} console.log(`\t${$("title").text()}`);
 	$("h2[class='episodeye']").find("a").each((i,elem) => {
 		if($(elem).text()){
 			info.push($(elem).attr("href"));
@@ -112,7 +120,6 @@ function findTitle(page){
 
 		Can't find Anime Title`); process.exit();
 		}
-//		console.log(info);
 		prompt.question("\n >>> ",(il) => {
 			if(il !== ''){
 				if((il-1) < info.length){
